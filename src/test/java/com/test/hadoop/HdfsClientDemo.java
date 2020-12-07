@@ -2,10 +2,14 @@ package com.test.hadoop;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.util.Progressable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -103,5 +107,24 @@ public class HdfsClientDemo {
                 System.out.println("⽂件夹:" + fileStatus.getPath().getName());
             }
         }
+    }
+
+    /**
+     * 验证packet
+     * @throws IOException
+     */
+    @Test
+    public void testPacket() throws IOException {
+        //1. 读取本地⽂件的输⼊流
+        final FileInputStream inputStream = new FileInputStream(new
+                File("D:/testPacket2.txt"));
+        //2. 准备写数据到hdfs的输出流
+        final FSDataOutputStream outputStream = fs.create(new Path("/testPacket3.txt"), new Progressable() {
+            public void progress() {
+                System.out.println("传输一次64KB");
+            }
+        });
+        // 3. 实现流拷⻉;默认关闭流选项是true，所以会⾃动关闭
+        IOUtils.copyBytes(inputStream, outputStream, configuration);
     }
 }
